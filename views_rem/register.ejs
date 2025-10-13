@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            background-color: rgba(0, 0, 0, 0.859);
+            text-align: center;
+            font-family: "Exo", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .main {
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00cdaf;
+            background-color: rgba(0, 0, 0, 0.448);
+            width: 500px;
+            border: 5px solid black;
+            border-radius: 15px;
+            box-shadow: 0 0 10px #00cdaf;
+            padding: 20px;
+        }
+        h1 {
+            margin: 10px;
+            font-size: 48px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            font-size: 18px;
+            padding: 10px;
+            background-color: #026f5f;
+            border-radius: 10px;
+            border: #00cdaf 2px solid;
+            color: #00cdaf; 
+            width: 100%;
+        }
+        input::placeholder {
+            color: black;
+            font-family: "Exo", Arial, sans-serif;
+        }
+        input[type="submit"] {
+            font-size: 24px;
+            color: black;
+            background-color: #00cdaf;
+            border: 2px solid black;
+            border-radius: 5px;
+            font-family: "Exo";
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        input[type="submit"]:hover {
+            cursor: pointer;
+            background-color: black;
+            color: #00cdaf;
+        }
+        a {
+            color: #00cdaf;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+        }
+        table td {
+            font-size: 20px;
+            padding: 5px 0;
+            text-align: left;
+        }
+        table td:first-child {
+            color: #00cdaf; 
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: black;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #00cdaf;
+            border-radius: 5px;
+            border: 3px solid #026f5f;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #026f5f;
+            border: 3px solid #00cdaf;
+        }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="main">
+            <h1>Register</h1>
+            <form action="/register" method="POST">
+                <table>
+                    <tr>
+                        <td>Name:</td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Name" type="text" name="name" required autofocus></td>
+
+                    </tr>
+                    <tr>
+                        <td>Email:</td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Email" type="email" name="email" required></td>
+
+                    </tr>
+                    <tr>
+                        <td>Password:   </td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Password" type="password" name="password" required></td>
+
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input class="btn btn-md btn-primary btn-block mt-3 mb-3" type="submit" name="register" value="Register">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <a href="/login">Already have an account? Login</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</body>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+</html>

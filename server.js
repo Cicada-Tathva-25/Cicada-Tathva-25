@@ -95,3 +95,81 @@ app.get('/profile',checkAuthenticated,(req,res)=>{
   res.render('profile',{user:req.user});
 
 })
+
+
+
+
+// Post
+app.post('/register',checkNotAuthenticated,(req,res)=>{
+
+    var user=new User({
+        name:req.body.name,
+        email:req.body.email,
+        password:req.body.password
+    })
+    user.save().then(()=>{
+        console.log('User saved');
+        res.redirect('/login');
+    })
+})
+app.post('/login',checkNotAuthenticated,passport.authenticate('local',{
+    successRedirect: '/profile',
+    failureRedirect: '/login'
+  }))
+
+app.post('/profile',async (req,res)=>{
+  //console.log(req.user);
+  var date1=new Date();
+
+  var log=new Log({
+    email:req.user.email,
+    start:date1
+})
+let logfind=await Log.findOne({email:req.user.email});
+ console.log("Found one",logfind);
+
+ if(!logfind){
+ await log.save().then(()=>{
+    console.log('Email created');
+    res.redirect('/1PVKQGGbqvr66wRT22Yf1NpCqc9kyE');
+}).catch((err) => {
+  console.log("err here"+err);
+  res.send(err.message);
+});
+}
+else{
+  console.log(req.user.email,"Exists");
+  res.redirect('/1PVKQGGbqvr66wRT22Yf1NpCqc9kyE');
+}
+});
+
+//Logout
+app.delete('/logout', (req, res) => {
+    req.logout(function(err) {
+        if (err) {
+          return next(err);
+          }
+        res.redirect('/login');
+      });
+  });
+
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next()
+    }
+
+    res.redirect('/login')
+  }
+
+  function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return res.redirect('/profile')
+    }
+    next()
+  }
+
+app.listen(3000,()=>{
+    console.log("Server listening on port 3000");
+})
+
+

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            body {
+                background: url("images/cicada.jpg");
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                background-color: #050505;
+                font-family: "Exo";
+                height: 100vh;
+            }
+            h3{
+              font-size: 32px;
+            }
+            h1{
+              font-size: 48px;
+            }
+            p{
+              font-size: 20px;
+            }
+            .container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                height: 400px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: #00cdaf;
+                background-color: rgba(0, 0, 0, 0.795);
+                backdrop-filter: blur(5px);
+                width: 500px;
+                border: 5px solid black;
+                border-radius: 15px;
+                box-shadow: 0 0 10px #00cdaf;
+                width: 600px;
+            }
+
+
+            #start {
+                border: 2px solid black;
+                border-radius: 5px;
+                font-size: 24px;
+                width: 350px;
+                color: black;
+                background-color: #00cdaf;
+                font-family: "Exo";
+                font-weight: bold;
+                margin: 10px;
+                padding: 5px;
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+
+            #start:hover {
+                cursor: pointer;
+                background-color: black;
+                color: #00cdaf;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div
+            class="container text-center d-flex justify-content-center align-items-center flex-column"
+        >
+            
+            
+
+            <form action="/profile" method="post">
+                <% if(typeof sts !=='undefined' ){ %>
+                  <h3>Congratulations!</h3>
+                  <h3>You've successfully completed all the challenges!</h3>
+                  <br />
+                  <p>
+                      We hope you enjoyed cracking the puzzles and testing your skills.  
+                      Thank you for being a part of Cicada '25!  
+                      Don't forget to explore the rest of the fest and celebrate your victory.
+                  </p>
+                <% } else { %>
+                <h1>Welcome to the Challenge</h1>
+                <h3>Are you ready to test your skills?</h3>
+                <br />
+                <p>
+                  A journey awaits, full of riddles, code, and hidden secrets.
+Only the sharpest minds will make it to the end.
+                </p>
+                <input
+                    type="submit"
+                    class="btn"
+                    value="Start"
+                    id="start"
+                />
+                <% } %>
+            </form>
+        </div>
+    </body>
+</html>
