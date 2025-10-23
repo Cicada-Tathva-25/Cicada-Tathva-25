@@ -17,12 +17,7 @@ const PORT = 3000;
 const CONFIG = {
     SESSION_SECRET: process.env.SESSION_SECRET || 'your-super-secret-session-key-12345'
 };
-// ============================================
-// CONFIGURATION
-// ============================================
 
-
-// Hidden URLs
 const PAGE1_URL = "/1G7mNkXq9VyF3Hd0RJplzTwB64sSnMEg";
 const PAGE2_URL = "/2cPz6Df1HtVUXYgZQeaO48m5WrbKsLxE";
 const PAGE3_URL = "/3jL08ZVyNC3HwRpd7oFMSleKuIAtT1gX";
@@ -30,11 +25,8 @@ const PAGE4_URL = "/4Ex0YVhwqB5FGZndtrb3USpoCkm9MjKi";
 const PAGE5_URL = "/5T9DQILHz5yAx3uRbPWSj7g2MfKn0coV";
 const PAGE6_URL = "/6kEVdZ7qM5saFbRTHvl9iGtgN4WyP1UO";
 const PAGE7_URL = "/7X0W8sZTjmknF1Dy7AgLVQcI4uf3rbJO";
-const PAGE8_URL = "/8oRwYy03KsCbHUKxt8FnMTiq9zISejl5";
+const PAGE8_URL = "/274877906944";
 
-// ============================================
-// MIDDLEWARE SETUP
-// ============================================
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
@@ -56,9 +48,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ============================================
-// BASIC ROUTES
-// ============================================
 
 app.get('/', (req, res) => {
     res.render('../views_rem/home', { user: req.user, layout: '../views_rem/home' });
@@ -72,9 +61,6 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('../views_rem/register', { layout: '../views_rem/register' });
 });
 
-// ============================================
-// ADMIN ROUTE
-// ============================================
 
 app.get('/admin', async (req, res) => {
     try {
@@ -88,7 +74,6 @@ app.get('/admin', async (req, res) => {
     let lastTimestamp = null;
     let level = 0;
     
-    // Find the highest completed level and its timestamp
     for (let i = 1; i <= 8; i++) {
         const levelKey = `level${i}`;
         if (log[levelKey]) {
@@ -97,7 +82,6 @@ app.get('/admin', async (req, res) => {
         }
     }
     
-    // Calculate time taken only if at least one level is completed
     let timeTaken = 0;
     if (lastTimestamp && log.start) {
         timeTaken = new Date(lastTimestamp).getTime() - new Date(log.start).getTime();
@@ -123,9 +107,6 @@ app.get('/admin', async (req, res) => {
     }
 });
 
-// ============================================
-// AUTHENTICATION ROUTES
-// ============================================
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
@@ -157,9 +138,6 @@ app.delete('/logout', (req, res, next) => {
     });
 });
 
-// ============================================
-// PROFILE ROUTE
-// ============================================
 
 app.get('/profile', checkAuthenticated, (req, res) => {
     console.log('Profile accessed by:', req.user.email);
@@ -190,10 +168,48 @@ app.post('/profile', checkAuthenticated, async (req, res) => {
 });
 
 // ============================================
-// LEVEL GET ROUTES
+// MIDDLEWARE FOR LEVEL PROTECTION
 // ============================================
 
-// Page 1 - Payment Challenge
+// Middleware to check if user has completed previous level
+// ============================================
+// MIDDLEWARE FOR LEVEL PROTECTION
+// ============================================
+
+// ============================================
+// MIDDLEWARE FOR LEVEL PROTECTION
+// ============================================
+
+function checkLevelAccess(requiredLevel) {
+    return async (req, res, next) => {
+        try {
+            const log = await Log.findOne({ email: req.user.email });
+            
+            if (!log) {
+                return res.redirect(PAGE1_URL);
+            }
+            
+            // Check if previous level is completed
+            if (requiredLevel > 1) {
+                const previousLevel = `level${requiredLevel - 1}`;
+                if (!log[previousLevel]) {
+                    const pageUrls = [PAGE1_URL, PAGE2_URL, PAGE3_URL, PAGE4_URL, PAGE5_URL, PAGE6_URL, PAGE7_URL, PAGE8_URL];
+                    return res.redirect(pageUrls[0]); // Send to level 1
+                }
+            }
+            
+            next();
+        } catch (err) {
+            console.error('Level access check error:', err);
+            res.redirect(PAGE1_URL);
+        }
+    };
+}
+
+// ============================================
+// LEVEL GET ROUTES WITH PROTECTION
+// ============================================
+
 app.get(PAGE1_URL, checkAuthenticated, (req, res) => {
     console.log('Level 1 accessed by:', req.user.email);
     res.render('page1', { 
@@ -203,8 +219,7 @@ app.get(PAGE1_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 2 - Prime Numbers
-app.get(PAGE2_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE2_URL, checkAuthenticated, checkLevelAccess(2), (req, res) => {
     console.log('Level 2 accessed by:', req.user.email);
     res.render('page2', { 
         user: req.user, 
@@ -213,8 +228,7 @@ app.get(PAGE2_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 3 - ZIP Archive Challenge
-app.get(PAGE3_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE3_URL, checkAuthenticated, checkLevelAccess(3), (req, res) => {
     console.log('Level 3 accessed by:', req.user.email);
     res.render('page3', { 
         user: req.user, 
@@ -223,8 +237,7 @@ app.get(PAGE3_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 4 - Time/Hash Puzzle
-app.get(PAGE4_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE4_URL, checkAuthenticated, checkLevelAccess(4), (req, res) => {
     console.log('Level 4 accessed by:', req.user.email);
     res.render('page4', { 
         user: req.user,
@@ -233,8 +246,7 @@ app.get(PAGE4_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 5 - Exposure Challenge
-app.get(PAGE5_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE5_URL, checkAuthenticated, checkLevelAccess(5), (req, res) => {
     console.log('Level 5 accessed by:', req.user.email);
     res.render('page5', {
         user: req.user,
@@ -243,10 +255,7 @@ app.get(PAGE5_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-
-
-// Page 6 - Audio Challenge
-app.get(PAGE6_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE6_URL, checkAuthenticated, checkLevelAccess(6), (req, res) => {
     console.log('Level 6 accessed by:', req.user.email);
     res.render('page6', {
         user: req.user,
@@ -255,7 +264,7 @@ app.get(PAGE6_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 7 - File Download Challenge
+// Level 7 - NO PROTECTION
 app.get(PAGE7_URL, checkAuthenticated, (req, res) => {
     console.log('Level 7 accessed by:', req.user.email);
     res.render('page7', {
@@ -265,8 +274,7 @@ app.get(PAGE7_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-// Page 8 - Final Image Puzzle
-app.get(PAGE8_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE8_URL, checkAuthenticated, checkLevelAccess(8), (req, res) => {
     console.log('Level 8 accessed by:', req.user.email);
     res.render('page8', {
         user: req.user,
@@ -279,7 +287,6 @@ app.get(PAGE8_URL, checkAuthenticated, (req, res) => {
 // LEVEL POST ROUTES
 // ============================================
 
-// Helper function to handle standard level completion
 async function handleLevelCompletion(req, res, levelNum, answerField, correctAnswer, currentPage, nextPage, errorMessage) {
     try {
         const userAnswer = req.body[answerField];
@@ -321,7 +328,7 @@ async function handleLevelCompletion(req, res, levelNum, answerField, correctAns
     }
 }
 
-// Level 1 - Payment Challenge
+
 app.post(PAGE1_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 1, 'pay', process.env.KEY_1, 
@@ -329,7 +336,7 @@ app.post(PAGE1_URL, (req, res) => {
     );
 });
 
-// Level 2 - Prime Numbers
+
 app.post(PAGE2_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 2, 'key2',process.env.KEY_2,
@@ -337,7 +344,7 @@ app.post(PAGE2_URL, (req, res) => {
     );
 });
 
-// Level 3 - ZIP Archive Challenge
+
 app.post(PAGE3_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 3, 'key3', process.env.KEY_3,
@@ -345,7 +352,7 @@ app.post(PAGE3_URL, (req, res) => {
     );
 });
 
-// Level 4 - Time/Hash Puzzle
+
 app.post(PAGE4_URL, async (req, res) => {
     try {
         const { hrs, min, sec } = req.body;
@@ -386,7 +393,7 @@ app.post(PAGE4_URL, async (req, res) => {
     }
 });
 
-// Level 5 - Exposure Challenge
+
 app.post(PAGE5_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 5, 'key5', process.env.KEY_5,
@@ -394,7 +401,7 @@ app.post(PAGE5_URL, (req, res) => {
     );
 });
 
-// Level 6 - Audio Challenge
+
 app.post(PAGE6_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 6, 'key6', process.env.KEY_6,
@@ -402,7 +409,7 @@ app.post(PAGE6_URL, (req, res) => {
     );
 });
 
-// Level 7 - File Download Challenge
+
 app.post(PAGE7_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 7, 'key7', process.env.KEY_7,
@@ -410,7 +417,7 @@ app.post(PAGE7_URL, (req, res) => {
     );
 });
 
-// Level 8 - Final Image Puzzle
+
 app.post(PAGE8_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 8, 'key8', process.env.KEY_8,
@@ -418,9 +425,7 @@ app.post(PAGE8_URL, (req, res) => {
     );
 });
 
-// ============================================
-// MIDDLEWARE
-// ============================================
+
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -436,9 +441,7 @@ function checkNotAuthenticated(req, res, next) {
     next();
 }
 
-// ============================================
-// START SERVER
-// ============================================
+
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
