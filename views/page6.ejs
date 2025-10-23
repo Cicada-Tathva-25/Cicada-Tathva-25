@@ -1,0 +1,186 @@
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #242424;
+        color: #00cdaf;
+        font-family: "Exo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .content {
+        height: calc(100vh - 60px);
+        background-color: #242424;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main {
+        height: 750px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #00cdaf;
+        background-color: #141414;
+        width: 40vw;
+        min-width: 500px;
+        border: 5px solid black;
+        border-radius: 15px;
+        box-shadow: 0 0 10px #00cdaf;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 48px;
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    h2 {
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    p {
+        font-size: 24px;
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    #hint {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    audio {
+        background-color: white;
+        border-radius: 10px;
+        border: 1px solid white;
+        margin-bottom: 10px;
+        width: 80%;
+    }
+
+    .download-link {
+        color: black;
+        text-decoration: none;
+        border: 2px solid black;
+        border-radius: 5px;
+        font-size: 24px;
+        background-color: #00cdaf;
+        font-family: "Exo";
+        font-weight: bold;
+        padding: 10px 50px;
+        margin: 10px 0;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .download-link:hover {
+        text-decoration: none;
+        cursor: pointer;
+        background-color: black;
+        color: #00cdaf;
+        transform: scale(1.05);
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    input[type="text"] {
+        font-size: 24px;
+        padding: 10px;
+        background-color: #026f5f;
+        border-radius: 10px;
+        border: #00cdaf 2px solid;
+        color: black;
+        width: 80%;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    input::placeholder {
+        color: black;
+        font-family: "Exo", Arial, sans-serif;
+    }
+
+    #submitBtn {
+        border: 2px solid black;
+        border-radius: 5px;
+        font-size: 24px;
+        color: black;
+        background-color: #00cdaf;
+        font-family: "Exo";
+        font-weight: bold;
+        margin-top: 10px;
+        padding: 10px 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 200px;
+    }
+
+    #submitBtn:hover {
+        background-color: black;
+        color: #00cdaf;
+        transform: scale(1.05);
+    }
+
+    .error {
+        color: red;
+        margin-top: 15px;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .main {
+            width: 90vw;
+            min-width: unset;
+            height: auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 36px;
+        }
+        
+        p {
+            font-size: 18px;
+        }
+        
+        audio {
+            width: 95%;
+        }
+    }
+</style>
+
+<div class="content">
+    <div class="main">
+        <h1>Audio Challenge - Decode the Message</h1>
+        <p>Download the audio file below and analyze it carefully. Hidden within, you'll find the key to proceed.</p>
+        
+        <audio src="/audio/mystery.wav" controls></audio>
+        <br />
+        
+        <a href="/audio/mystery.wav" download class="download-link">Download Audio File</a>
+        
+        <h2>Enter the Answer:</h2>
+        
+        <form action="/6kEVdZ7qM5saFbRTHvl9iGtgN4WyP1UO" method="POST">
+            <input type="text" name="key6" placeholder="Enter your answer here" required />
+            <input type="submit" id="submitBtn" value="Submit">
+        </form>
+        
+        <% if (error) { %>
+            <p class="error"><%= error %></p>
+        <% } %>
+        
+        <p id="hint">Hint: The five letter word is the answer.</p>
+    </div>
+</div>

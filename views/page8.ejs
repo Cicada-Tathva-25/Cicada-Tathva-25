@@ -1,0 +1,124 @@
+<style>
+    body {
+        background-color: #242424;
+        font-family: 'Exo', sans-serif;
+        color: #00e0b8;
+        margin: 0;
+    }
+
+    .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 60px);
+    }
+
+    .card {
+        width: 500px;
+        background: linear-gradient(145deg, #111, #1a1a1a);
+        border: 1px solid #00e0b8;
+        box-shadow: 0 0 25px rgba(0, 224, 184, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .card h2 {
+        font-size: 24px;
+        color: #00e0b8;
+        margin-bottom: 20px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    img {
+        border: 2px solid #00e0b8;
+        border-radius: 10px;
+        width: 100%;
+        height: auto;
+        box-shadow: 0 0 15px rgba(0, 224, 184, 0.2);
+        margin-bottom: 15px;
+    }
+
+    .hint {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #9efce7;
+        font-family: 'Exo', sans-serif;
+        margin-bottom: 20px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 18px;
+        background-color: #111;
+        border-radius: 10px;
+        border: 2px solid #00e0b8;
+        color: #00e0b8;
+        outline: none;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .input-field::placeholder { color: #66ffe4; }
+    .input-field:focus { background-color: #141414; border-color: #4effd4; box-shadow: 0 0 8px #00e0b8; }
+
+    .button {
+        width: 100%;
+        background-color: #00e0b8;
+        color: #0f0f0f;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .button:hover { 
+        background-color: #13ffce; 
+        transform: scale(1.03); 
+        box-shadow: 0 0 10px #00e0b8; 
+    }
+    
+    .error { 
+        margin-top: 15px; 
+        color: #ff4444; 
+        font-size: 16px; 
+        font-weight: bold;
+    }
+
+    .final-note {
+        color: #4effd4;
+        font-weight: bold;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="content">
+    <div class="card">
+        <h2>Unveil the Hidden Message</h2>
+        <img src="/images/butterfly.gif" alt="image.gif">
+        <p class="hint">Hint: “Look closely at the colors themselves — sometimes the smallest changes speak the loudest.”.</p>
+
+        <form action="/8oRwYy03KsCbHUKxt8FnMTiq9zISejl5" method="POST">
+            <input
+                type="text"
+                class="input-field"
+                name="key8"
+                placeholder="Enter the answer here"
+                required
+            />
+            <input type="submit" class="button" value="Submit Answer">
+        </form>
+
+        <% if (error) { %>
+            <p class="error"><%= error %></p>
+        <% } %>
+
+    </div>
+</div>

@@ -1,0 +1,156 @@
+
+<style>
+    body {
+        background-color: #242424;
+        font-family: 'Exo', sans-serif;
+        color: #00e0b8;
+        margin: 0;
+    }
+
+    .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 60px);
+    }
+
+    .card {
+        width: 500px;
+        background: linear-gradient(145deg, #111, #1a1a1a);
+        border: 1px solid #00e0b8;
+        box-shadow: 0 0 25px rgba(0, 224, 184, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .card h2 {
+        font-size: 24px;
+        color: #00e0b8;
+        margin-bottom: 20px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    .download-link {
+        display: inline-block;
+        background-color: #00e0b8;
+        color: #0f0f0f;
+        padding: 12px 24px;
+        font-size: 18px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        margin: 15px 0;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .download-link:hover {
+        background-color: #13ffce;
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #00e0b8;
+    }
+
+    .hint {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #9efce7;
+        font-family: 'Exo', sans-serif;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 18px;
+        background-color: #111;
+        border-radius: 10px;
+        border: 2px solid #00e0b8;
+        color: #00e0b8;
+        outline: none;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .input-field::placeholder { color: #66ffe4; }
+    .input-field:focus { background-color: #141414; border-color: #4effd4; box-shadow: 0 0 8px #00e0b8; }
+
+    .button {
+        width: 100%;
+        background-color: #00e0b8;
+        color: #0f0f0f;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .button:hover { 
+        background-color: #13ffce; 
+        transform: scale(1.03); 
+        box-shadow: 0 0 10px #00e0b8; 
+    }
+    
+    .error { 
+        margin-top: 15px; 
+        color: #ff4444; 
+        font-size: 16px; 
+        font-weight: bold;
+    }
+
+    .special-note {
+        color: #4effd4;
+        font-weight: bold;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="content">
+    <div class="card">
+        <h2>Extract the ZIP file and find the hidden path</h2>
+        
+        <a href="/files/1000.zip" download class="download-link">
+            Download ZIP Archive
+        </a>
+        
+        <p class="hint">Among a sea of zipped-up tales,
+Ten thousand files in endless trails,
+Only one holds what you seek—
+A secret answer, clear and sleek.
+
+Look for digits, two at start,
+Then five letters form the heart,
+Followed close by yes or no,
+Ending with a digit’s glow.
+
+Scan each name, don’t lose your way,
+The truth is hidden in the fray.
+One alone will light your quest—
+Find it first, and solve the rest.</p>
+        
+        <p class="special-note"> Enter the file name</p>
+
+        <form action="/3jL08ZVyNC3HwRpd7oFMSleKuIAtT1gX" method="POST">
+            <input
+                type="text"
+                class="input-field"
+                name="key3"
+                placeholder="Enter your answer here"
+                required
+            />
+            <input type="submit" class="button" value="Submit Answer">
+        </form>
+
+        <% if (error) { %>
+            <p class="error"><%= error %></p>
+        <% } %>
+    </div>
+</div>

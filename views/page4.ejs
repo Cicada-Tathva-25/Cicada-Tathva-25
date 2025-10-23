@@ -1,0 +1,119 @@
+<style>
+    body {
+        background-color: #242424;
+        font-family: 'Exo', sans-serif;
+        color: #00cdaf;
+        margin: 0;
+    }
+
+    .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 60px);
+        position: relative;
+    }
+
+    .card {
+        width: 500px;
+        background-color: #141414;
+        border: 1px solid #00cdaf;
+        box-shadow: 0 0 15px #00cdaf;
+        color: #00cdaf;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .inputs {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .inputs input {
+        width: 30%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #00cdaf;
+        background-color: #141414;
+        color: #00cdaf;
+        font-size: 1rem;
+        text-align: center;
+        box-shadow: 0 0 10px #00cdaf;
+        transition: all 0.3s ease;
+    }
+
+    .inputs input:focus {
+        box-shadow: 0 0 25px #00ffcc;
+        outline: none;
+    }
+
+    .button-submit {
+        background-color: #00cdaf;
+        color: #141414;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px #00cdaf;
+    }
+
+    .button-submit:hover {
+        background-color: #00b397;
+        box-shadow: 0 0 20px #00ffcc;
+    }
+
+    .hint {
+        font-size: 0.9rem;
+        margin-top: 15px;
+        color: #00ffcc;
+    }
+
+    .error-text {
+        color: red;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="content">
+    <div class="card">
+        <h1>Puzzle Question</h1>
+        <p>
+            Find N, the coils of the SHA-256 serpent upon "calicut" that first reveal triple zeros,<br>
+            From the zenith of the day, wind the hands backwards by N ticks and N heartbeats, Where do they rest?
+        </p>
+
+        <% if (error) { %>
+            <p class="error-text"><%= error %></p>
+        <% } %>
+
+        <form action="/4Ex0YVhwqB5FGZndtrb3USpoCkm9MjKi" method="POST">
+            <div class="inputs">
+                <input type="number" name="hrs" placeholder="Hrs" min="0" max="23" required>
+                <input type="number" name="min" placeholder="Min" min="0" max="59" required>
+                <input type="number" name="sec" placeholder="Sec" min="0" max="59" required>
+            </div>
+            <button type="submit" class="button-submit">Submit</button>
+        </form>
+
+        <div class="hint">Hint: Count the serpent's coils carefully</div>
+    </div>
+</div>
