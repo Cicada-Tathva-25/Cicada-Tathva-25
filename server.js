@@ -146,49 +146,98 @@ app.delete('/logout', (req, res, next) => {
     });
 });
 
-app.get('/profile', checkAuthenticated, (req, res) => {
-    console.log('Profile accessed by:', req.user.email);
-    res.render('profile', { 
-        user: req.user,
-        layout: 'layout'
-    });
+// UPDATED: Profile GET route to show appropriate message
+app.get('/profile', checkAuthenticated, async (req, res) => {
+    try {
+        console.log('Profile accessed by:', req.user.email);
+        
+        // Check user's current progress
+        const currentLevel = await getCurrentLevel(req.user.email);
+        
+        if (currentLevel === 0) {
+            // No levels completed - new user
+            res.render('profile', { 
+                user: req.user,
+                layout: 'layout',
+                message: 'start'
+            });
+        } else if (currentLevel === 8) {
+            // All levels completed
+            res.render('profile', { 
+                user: req.user,
+                layout: 'layout',
+                message: 'completed'
+            });
+        } else {
+            // Some levels completed - returning user
+            res.render('profile', { 
+                user: req.user,
+                layout: 'layout',
+                message: 'resume'
+            });
+        }
+    } catch (err) {
+        console.error('Profile route error:', err);
+        res.render('profile', { 
+            user: req.user,
+            layout: 'layout',
+            message: 'start'
+        });
+    }
 });
 
+// UPDATED: Profile POST route to redirect to appropriate level
 app.post('/profile', checkAuthenticated, async (req, res) => {
     try {
         let logfind = await Log.findOne({ email: req.user.email });
         
         if (!logfind) {
+            // First time user - create log and start from level 1
             const log = new Log({
                 email: req.user.email,
                 start: new Date()
             });
             await log.save();
             console.log('Log created for:', req.user.email);
+            res.redirect(PAGE1_URL);
+        } else {
+            // Returning user - redirect to their next level
+            const currentLevel = await getCurrentLevel(req.user.email);
+            
+            if (currentLevel === 8) {
+                // All levels completed
+                res.render('profile', { 
+                    user: req.user, 
+                    layout: 'layout',
+                    message: 'completed'
+                });
+            } else {
+                // Redirect to the next level they need to complete
+                const nextLevel = currentLevel + 1;
+                res.redirect(LEVEL_URLS[nextLevel]);
+            }
         }
-        
-        res.redirect(PAGE1_URL);
     } catch (err) {
         console.error('Profile POST error:', err);
         res.status(500).send('Error creating log entry');
     }
 });
 
-// ============================================
-// IMPROVED LEVEL ACCESS MIDDLEWARE
-// ============================================
-
 async function getCurrentLevel(email) {
     try {
         const log = await Log.findOne({ email });
         if (!log) return 0;
         
+        // Find the highest completed level
+        let highestCompleted = 0;
         for (let i = 1; i <= 8; i++) {
-            if (!log[`level${i}`]) {
-                return i - 1; // Last completed level
+            if (log[`level${i}`]) {
+                highestCompleted = i;
+            } else {
+                break; // Stop at first incomplete level
             }
         }
-        return 8; // All levels completed
+        return highestCompleted;
     } catch (err) {
         console.error('Error getting current level:', err);
         return 0;
@@ -200,12 +249,10 @@ function checkLevelAccess(requiredLevel) {
         try {
             const currentLevel = await getCurrentLevel(req.user.email);
             
-            // Allow access only to the next level user should be on
             if (requiredLevel <= currentLevel + 1) {
                 return next();
             }
             
-            // Redirect to the level they should be on
             const redirectLevel = Math.min(currentLevel + 1, 8);
             res.redirect(LEVEL_URLS[redirectLevel]);
             
@@ -215,10 +262,6 @@ function checkLevelAccess(requiredLevel) {
         }
     };
 }
-
-// ============================================
-// LEVEL GET ROUTES WITH PROPER PROTECTION
-// ============================================
 
 app.get(PAGE1_URL, checkAuthenticated, checkLevelAccess(1), (req, res) => {
     console.log('Level 1 accessed by:', req.user.email);
@@ -274,7 +317,6 @@ app.get(PAGE6_URL, checkAuthenticated, checkLevelAccess(6), (req, res) => {
     });
 });
 
-// Level 7 - Special URL manipulation level
 app.get(PAGE7_URL, checkAuthenticated, checkLevelAccess(7), (req, res) => {
     console.log('Level 7 accessed by:', req.user.email);
     res.render('page7', {
@@ -284,15 +326,12 @@ app.get(PAGE7_URL, checkAuthenticated, checkLevelAccess(7), (req, res) => {
     });
 });
 
-// Level 8 - Auto-completes Level 7 when accessed via correct URL
 app.get(PAGE8_URL, checkAuthenticated, async (req, res) => {
     try {
         console.log('Level 8 accessed by:', req.user.email);
         
         const currentLevel = await getCurrentLevel(req.user.email);
         
-        // If user hasn't completed Level 7 but accessed Level 8 URL,
-        // this means they successfully solved Level 7 via URL manipulation
         if (currentLevel === 6) {
             await Log.findOneAndUpdate(
                 { email: req.user.email }, 
@@ -302,10 +341,8 @@ app.get(PAGE8_URL, checkAuthenticated, async (req, res) => {
             console.log(`Level 7 completed via URL manipulation by ${req.user.email}`);
         }
         
-        // Now check if they should be allowed to access Level 8
         const updatedLevel = await getCurrentLevel(req.user.email);
         if (updatedLevel < 7) {
-            // If they still haven't completed Level 7, redirect them back
             return res.redirect(PAGE7_URL);
         }
         
@@ -320,10 +357,6 @@ app.get(PAGE8_URL, checkAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================
-// LEVEL POST ROUTES
-// ============================================
-
 async function handleLevelCompletion(req, res, levelNum, answerField, correctAnswer, currentPage, nextPage, errorMessage) {
     try {
         const userAnswer = req.body[answerField];
@@ -334,7 +367,6 @@ async function handleLevelCompletion(req, res, levelNum, answerField, correctAns
             const logfind = await Log.findOne({ email: req.user.email });
             const levelKey = `level${levelNum}`;
             
-            // Only update if not already completed
             if (!logfind || !logfind[levelKey]) {
                 await Log.findOneAndUpdate(
                     { email: req.user.email }, 
@@ -345,7 +377,11 @@ async function handleLevelCompletion(req, res, levelNum, answerField, correctAns
             }
             
             if (levelNum === 8) {
-                res.render('profile', { user: req.user, sts: 'Completed', layout: 'layout' });
+                res.render('profile', { 
+                    user: req.user, 
+                    layout: 'layout',
+                    message: 'completed'
+                });
             } else {
                 res.redirect(nextPage);
             }
@@ -445,8 +481,6 @@ app.post(PAGE6_URL, (req, res) => {
     );
 });
 
-// Level 7 POST route - Since Level 7 is solved via URL manipulation, 
-// redirect back to Level 7 page if someone tries to POST
 app.post(PAGE7_URL, async (req, res) => {
     res.redirect(PAGE7_URL);
 });
