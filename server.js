@@ -6,8 +6,8 @@ const passport = require('passport');
 const User = require('./models/user_model');
 const Log = require('./models/log_model');
 const connection = require('./connection');
-const passportconfig = require('./passport-config');
 const methodOverride = require('method-override');
+require('./passport-config');
 
 const ejsLayouts = require("express-ejs-layouts");
 const session = require('express-session');
@@ -27,6 +27,16 @@ const PAGE6_URL = "/6kEVdZ7qM5saFbRTHvl9iGtgN4WyP1UO";
 const PAGE7_URL = "/7X0W8sZTjmknF1Dy7AgLVQcI4uf3rbJO";
 const PAGE8_URL = "/274877906944";
 
+const LEVEL_URLS = {
+    1: PAGE1_URL,
+    2: PAGE2_URL,
+    3: PAGE3_URL,
+    4: PAGE4_URL,
+    5: PAGE5_URL,
+    6: PAGE6_URL,
+    7: PAGE7_URL,
+    8: PAGE8_URL
+};
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
@@ -48,7 +58,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.get('/', (req, res) => {
     res.render('../views_rem/home', { user: req.user, layout: '../views_rem/home' });
 });
@@ -61,7 +70,6 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('../views_rem/register', { layout: '../views_rem/register' });
 });
 
-
 app.get('/admin', async (req, res) => {
     try {
         const logs = await Log.find(
@@ -70,29 +78,30 @@ app.get('/admin', async (req, res) => {
             { lean: true }
         );
         
-       const res_arr = logs.map(log => {
-    let lastTimestamp = null;
-    let level = 0;
-    
-    for (let i = 1; i <= 8; i++) {
-        const levelKey = `level${i}`;
-        if (log[levelKey]) {
-            lastTimestamp = log[levelKey];
-            level = i;
-        }
-    }
-    
-    let timeTaken = 0;
-    if (lastTimestamp && log.start) {
-        timeTaken = new Date(lastTimestamp).getTime() - new Date(log.start).getTime();
-    }
-    
-    return {
-        mail: log.email,
-        time: timeTaken,
-        level: level
-    };
-});
+        const res_arr = logs.map(log => {
+            let lastTimestamp = null;
+            let level = 0;
+            
+            for (let i = 1; i <= 8; i++) {
+                const levelKey = `level${i}`;
+                if (log[levelKey]) {
+                    lastTimestamp = log[levelKey];
+                    level = i;
+                }
+            }
+            
+            let timeTaken = 0;
+            if (lastTimestamp && log.start) {
+                timeTaken = new Date(lastTimestamp).getTime() - new Date(log.start).getTime();
+            }
+            
+            return {
+                mail: log.email,
+                time: timeTaken,
+                level: level
+            };
+        });
+        
         res_arr.sort((a, b) => {
             if (a.level !== b.level) {
                 return b.level - a.level;
@@ -106,7 +115,6 @@ app.get('/admin', async (req, res) => {
         res.status(500).send('Error loading admin page');
     }
 });
-
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
@@ -138,7 +146,6 @@ app.delete('/logout', (req, res, next) => {
     });
 });
 
-
 app.get('/profile', checkAuthenticated, (req, res) => {
     console.log('Profile accessed by:', req.user.email);
     res.render('profile', { 
@@ -168,37 +175,40 @@ app.post('/profile', checkAuthenticated, async (req, res) => {
 });
 
 // ============================================
-// MIDDLEWARE FOR LEVEL PROTECTION
+// IMPROVED LEVEL ACCESS MIDDLEWARE
 // ============================================
 
-// Middleware to check if user has completed previous level
-// ============================================
-// MIDDLEWARE FOR LEVEL PROTECTION
-// ============================================
-
-// ============================================
-// MIDDLEWARE FOR LEVEL PROTECTION
-// ============================================
+async function getCurrentLevel(email) {
+    try {
+        const log = await Log.findOne({ email });
+        if (!log) return 0;
+        
+        for (let i = 1; i <= 8; i++) {
+            if (!log[`level${i}`]) {
+                return i - 1; // Last completed level
+            }
+        }
+        return 8; // All levels completed
+    } catch (err) {
+        console.error('Error getting current level:', err);
+        return 0;
+    }
+}
 
 function checkLevelAccess(requiredLevel) {
     return async (req, res, next) => {
         try {
-            const log = await Log.findOne({ email: req.user.email });
+            const currentLevel = await getCurrentLevel(req.user.email);
             
-            if (!log) {
-                return res.redirect(PAGE1_URL);
+            // Allow access only to the next level user should be on
+            if (requiredLevel <= currentLevel + 1) {
+                return next();
             }
             
-            // Check if previous level is completed
-            if (requiredLevel > 1) {
-                const previousLevel = `level${requiredLevel - 1}`;
-                if (!log[previousLevel]) {
-                    const pageUrls = [PAGE1_URL, PAGE2_URL, PAGE3_URL, PAGE4_URL, PAGE5_URL, PAGE6_URL, PAGE7_URL, PAGE8_URL];
-                    return res.redirect(pageUrls[0]); // Send to level 1
-                }
-            }
+            // Redirect to the level they should be on
+            const redirectLevel = Math.min(currentLevel + 1, 8);
+            res.redirect(LEVEL_URLS[redirectLevel]);
             
-            next();
         } catch (err) {
             console.error('Level access check error:', err);
             res.redirect(PAGE1_URL);
@@ -207,10 +217,10 @@ function checkLevelAccess(requiredLevel) {
 }
 
 // ============================================
-// LEVEL GET ROUTES WITH PROTECTION
+// LEVEL GET ROUTES WITH PROPER PROTECTION
 // ============================================
 
-app.get(PAGE1_URL, checkAuthenticated, (req, res) => {
+app.get(PAGE1_URL, checkAuthenticated, checkLevelAccess(1), (req, res) => {
     console.log('Level 1 accessed by:', req.user.email);
     res.render('page1', { 
         user: req.user,
@@ -264,8 +274,8 @@ app.get(PAGE6_URL, checkAuthenticated, checkLevelAccess(6), (req, res) => {
     });
 });
 
-// Level 7 - NO PROTECTION
-app.get(PAGE7_URL, checkAuthenticated, (req, res) => {
+// Level 7 - Special URL manipulation level
+app.get(PAGE7_URL, checkAuthenticated, checkLevelAccess(7), (req, res) => {
     console.log('Level 7 accessed by:', req.user.email);
     res.render('page7', {
         user: req.user,
@@ -274,13 +284,40 @@ app.get(PAGE7_URL, checkAuthenticated, (req, res) => {
     });
 });
 
-app.get(PAGE8_URL, checkAuthenticated, checkLevelAccess(8), (req, res) => {
-    console.log('Level 8 accessed by:', req.user.email);
-    res.render('page8', {
-        user: req.user,
-        layout: 'layout',
-        error: null
-    });
+// Level 8 - Auto-completes Level 7 when accessed via correct URL
+app.get(PAGE8_URL, checkAuthenticated, async (req, res) => {
+    try {
+        console.log('Level 8 accessed by:', req.user.email);
+        
+        const currentLevel = await getCurrentLevel(req.user.email);
+        
+        // If user hasn't completed Level 7 but accessed Level 8 URL,
+        // this means they successfully solved Level 7 via URL manipulation
+        if (currentLevel === 6) {
+            await Log.findOneAndUpdate(
+                { email: req.user.email }, 
+                { level7: new Date() }, 
+                { new: true }
+            );
+            console.log(`Level 7 completed via URL manipulation by ${req.user.email}`);
+        }
+        
+        // Now check if they should be allowed to access Level 8
+        const updatedLevel = await getCurrentLevel(req.user.email);
+        if (updatedLevel < 7) {
+            // If they still haven't completed Level 7, redirect them back
+            return res.redirect(PAGE7_URL);
+        }
+        
+        res.render('page8', {
+            user: req.user,
+            layout: 'layout',
+            error: null
+        });
+    } catch (err) {
+        console.error('Level 8 GET error:', err);
+        res.redirect(PAGE1_URL);
+    }
 });
 
 // ============================================
@@ -297,6 +334,7 @@ async function handleLevelCompletion(req, res, levelNum, answerField, correctAns
             const logfind = await Log.findOne({ email: req.user.email });
             const levelKey = `level${levelNum}`;
             
+            // Only update if not already completed
             if (!logfind || !logfind[levelKey]) {
                 await Log.findOneAndUpdate(
                     { email: req.user.email }, 
@@ -328,7 +366,6 @@ async function handleLevelCompletion(req, res, levelNum, answerField, correctAns
     }
 }
 
-
 app.post(PAGE1_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 1, 'pay', process.env.KEY_1, 
@@ -336,14 +373,12 @@ app.post(PAGE1_URL, (req, res) => {
     );
 });
 
-
 app.post(PAGE2_URL, (req, res) => {
     handleLevelCompletion(
-        req, res, 2, 'key2',process.env.KEY_2,
+        req, res, 2, 'key2', process.env.KEY_2,
         'page2', PAGE3_URL, 'Wrong answer, try again!'
     );
 });
-
 
 app.post(PAGE3_URL, (req, res) => {
     handleLevelCompletion(
@@ -352,7 +387,6 @@ app.post(PAGE3_URL, (req, res) => {
     );
 });
 
-
 app.post(PAGE4_URL, async (req, res) => {
     try {
         const { hrs, min, sec } = req.body;
@@ -360,10 +394,14 @@ app.post(PAGE4_URL, async (req, res) => {
         const userMinutes = parseInt(min, 10);
         const userSeconds = parseInt(sec, 10);
         
-        const correctHours =  process.env.KEY_4_hr;
+        const correctHours = process.env.KEY_4_hr;
         const correctMinutes = process.env.KEY_4_min;
         const correctSeconds = process.env.KEY_4_sec;
-        if (userHours === parseInt(correctHours, 10) && userMinutes === parseInt(correctMinutes, 10) && userSeconds === parseInt(correctSeconds, 10)) {        
+        
+        if (userHours === parseInt(correctHours, 10) && 
+            userMinutes === parseInt(correctMinutes, 10) && 
+            userSeconds === parseInt(correctSeconds, 10)) {
+            
             const logfind = await Log.findOne({ email: req.user.email });
             
             if (!logfind || !logfind.level4) {
@@ -393,14 +431,12 @@ app.post(PAGE4_URL, async (req, res) => {
     }
 });
 
-
 app.post(PAGE5_URL, (req, res) => {
     handleLevelCompletion(
         req, res, 5, 'key5', process.env.KEY_5,
         'page5', PAGE6_URL, 'Wrong answer, try again!'
     );
 });
-
 
 app.post(PAGE6_URL, (req, res) => {
     handleLevelCompletion(
@@ -409,14 +445,11 @@ app.post(PAGE6_URL, (req, res) => {
     );
 });
 
-
-app.post(PAGE7_URL, (req, res) => {
-    handleLevelCompletion(
-        req, res, 7, 'key7', process.env.KEY_7,
-        'page7', PAGE8_URL, 'Wrong answer, try again!'
-    );
+// Level 7 POST route - Since Level 7 is solved via URL manipulation, 
+// redirect back to Level 7 page if someone tries to POST
+app.post(PAGE7_URL, async (req, res) => {
+    res.redirect(PAGE7_URL);
 });
-
 
 app.post(PAGE8_URL, (req, res) => {
     handleLevelCompletion(
@@ -424,8 +457,6 @@ app.post(PAGE8_URL, (req, res) => {
         'page8', null, 'Wrong answer, try again!'
     );
 });
-
-
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -440,8 +471,6 @@ function checkNotAuthenticated(req, res, next) {
     }
     next();
 }
-
-
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
